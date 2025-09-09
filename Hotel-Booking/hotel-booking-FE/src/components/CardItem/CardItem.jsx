@@ -12,59 +12,65 @@ const CardItem = ({ data }) => {
   const defaultImage = "../assets/images/image.png";
   console.log("(CardItem)" + data.hotelImageUrls);
   return (
-    <div className="my-2">
-      <Card
-        className="rounded-xl overflow-hidden"
-        hoverable
-        cover={
+  <div className="my-2">
+    <Card
+      className="rounded-xl overflow-hidden relative"
+      hoverable
+      cover={
+        <div className="relative">
           <img
-            src={`http://localhost:8080${data?.hotelImageUrls[0]}` || defaultImage}
+            src={`http://localhost:8080${data?.hotelImageUrls?.[0]}` || defaultImage}
             alt={data?.hotelName || "Hotel Image"}
             className="h-48 w-full object-cover"
           />
-        }
-      >
-        <div className="flex flex-col">
-          <div className="flex flex-row justify-between items-center">
-            <div className="w-2/3 whitespace-nowrap overflow-hidden overflow-ellipsis">
-              <span className="font-medium text-lg text-gray-400">Khách sạn</span>
-            </div>
-            <Tag color="blue">Ngàn sao</Tag>
-          </div>
-
-          <Tooltip placement="bottom" title={data?.hotelName}>
-            <a
-              href="/"
-              className="font-medium text-lg mt-2 line-clamp-1 overflow-ellipsis"
-            >
-              {data?.hotelName}
-            </a>
-          </Tooltip>
-{/* ----- */}
-
-
-          <div className="flex items-center gap-2">
-            {/* Địa chỉ */}
-            <EnvironmentOutlined />
-            <span className="font-medium text-primary line-clamp-1 overflow-ellipsis" >
-              {data?.hotelAddress}
-            </span>
+          {/* Badge trạng thái phòng */}
+          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+            Còn phòng
           </div>
         </div>
-        <div className="mt-4 flex justify-between items-center">
-          <span className="text-red-500 font-semibold text-lg">
-            {data?.hotelAveragePrice ? `${data.hotelAveragePrice.toLocaleString()} VNĐ` : "Liên hệ"}
-          </span>
-          <Link
-            to={`/hotel/${data?.hotelId || "None"}`}
-            className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-50 transition"
+      }
+    >
+      <div className="flex flex-col">
+        <div className="flex flex-row justify-between items-center">
+          <div className="w-2/3 whitespace-nowrap overflow-hidden overflow-ellipsis">
+            <span className="font-medium text-lg text-gray-400">Khách sạn</span>
+          </div>
+          <Tag color="blue">Ngàn sao</Tag>
+        </div>
+
+        <Tooltip placement="bottom" title={data?.hotelName}>
+          <a
+            href="/"
+            className="font-medium text-lg mt-2 line-clamp-1 overflow-ellipsis"
           >
-            Xem chi tiết
-          </Link>
+            {data?.hotelName}
+          </a>
+        </Tooltip>
+
+        <div className="flex items-center gap-2">
+          <EnvironmentOutlined />
+          <span className="font-medium text-primary line-clamp-1 overflow-ellipsis">
+            {data?.hotelAddress}
+          </span>
         </div>
-      </Card>
-    </div>
-  );
+      </div>
+      <div className="mt-4 flex justify-between items-center">
+        <span className="text-red-500 font-semibold text-lg">
+          {data?.hotelAveragePrice
+            ? `${data.hotelAveragePrice.toLocaleString()} VNĐ`
+            : "Liên hệ"}
+        </span>
+        <Link
+          to={`/hotel/${data?.hotelId || "None"}`}
+          className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-50 transition"
+        >
+          Xem chi tiết
+        </Link>
+      </div>
+    </Card>
+  </div>
+);
+
 };
 
 export default CardItem;

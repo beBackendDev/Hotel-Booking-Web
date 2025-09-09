@@ -19,7 +19,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import UploadImage from "../../common/UploadImage";
 import DashboardLayout from "../../core/layout/Dashboard";
-import { updateRoomById  } from "../../slices/room.slice"; // bạn cần tạo slice này
+import { updateRoomById } from "../../slices/room.slice"; // bạn cần tạo slice này
 
 const fetchRoomById = async (hotelId, roomId) => {
   const token = localStorage.getItem("accessToken");
@@ -32,7 +32,7 @@ const fetchRoomById = async (hotelId, roomId) => {
       },
     }
   );
-  console.log("res: ", res);
+
   if (!res.ok) {
     throw new Error("Không lấy được dữ liệu phòng");
   }
@@ -51,9 +51,9 @@ const RoomProfile = () => {
 
   useEffect(() => {
     const load = async () => {
-      
+
       if (hotelId && roomId) {
-        
+
         setLoading(true);
         try {
           const data = await fetchRoomById(hotelId, roomId);
@@ -75,10 +75,10 @@ const RoomProfile = () => {
       hotelId: room?.hotelId,
       roomImageUrls: newImage ? [newImage.url] : room?.roomImageUrls,
     };
-    console.log("res:", _data);
     //Cập nhật phòng
     try {
-      const res = await dispatch(updateRoomById (_data));
+      const res = await dispatch(updateRoomById({hotelId, roomId, data: _data}));
+      console.log("res: ", res);
       unwrapResult(res);
       toast.success("Cập nhật phòng thành công");
       const updated = await fetchRoomById(hotelId, roomId);

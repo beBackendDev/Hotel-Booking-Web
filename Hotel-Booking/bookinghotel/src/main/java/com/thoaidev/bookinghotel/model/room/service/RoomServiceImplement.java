@@ -3,8 +3,10 @@ package com.thoaidev.bookinghotel.model.room.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,15 +79,14 @@ public class RoomServiceImplement implements RoomService {
         room.setHotel(hotel);
 
 //  Gán danh sách ảnh
-List<Image> imageEntities = Optional.ofNullable(roomDto.getRoomImageUrls())
-    .orElse(Collections.emptyList())
-    .stream()
-    .map(url -> Image.builder()
-        .url(url)
-        .room(room)
-        .build())
-    .collect(Collectors.toList());
-
+        List<Image> imageEntities = Optional.ofNullable(roomDto.getRoomImageUrls())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(url -> Image.builder()
+                .url(url)
+                .room(room)
+                .build())
+                .collect(Collectors.toList());
 
         room.setRoomImages(imageEntities);
 
@@ -106,15 +107,35 @@ List<Image> imageEntities = Optional.ofNullable(roomDto.getRoomImageUrls())
         if (roomDto.getRoomName() != null) {
             room.setRoomName(roomDto.getRoomName());
         }
+        // if (roomDto.getRoomImageUrls() != null) {
+        //     List<Image> imageEntities = roomDto.getRoomImageUrls().stream()
+        //             .map(url -> Image.builder()
+        //             .url(url)
+        //             .room(room) // liên kết ngược
+        //             .build())
+        //             .collect(Collectors.toList());
+        //     room.setRoomImages(imageEntities);
+        // }
+//thực hiện kiểm tra ảnh được thêm vào có trùng với url ảnh cũ không?xóa:giữ thêm mới
         if (roomDto.getRoomImageUrls() != null) {
-            List<Image> imageEntities = roomDto.getRoomImageUrls().stream()
-                    .map(url -> Image.builder()
-                    .url(url)
-                    .room(room) // liên kết ngược
-                    .build())
-                    .collect(Collectors.toList());
-            room.setRoomImages(imageEntities);
+            Set<String> newUrls = new HashSet<>(roomDto.getRoomImageUrls());
+
+            // Xoá ảnh không còn trong danh sách mới
+            room.getRoomImages().removeIf(img -> !newUrls.contains(img.getUrl()));
+
+            // Thêm ảnh mới chưa có
+            newUrls.forEach(url -> {
+                boolean exists = room.getRoomImages().stream()
+                        .anyMatch(img -> img.getUrl().equals(url));
+                if (!exists) {
+                    room.getRoomImages().add(Image.builder()
+                            .url(url)
+                            .room(room)
+                            .build());
+                }
+            });
         }
+
         if (roomDto.getRoomOccupancy() != null) {
             room.setRoomOccupancy(roomDto.getRoomOccupancy());
         }

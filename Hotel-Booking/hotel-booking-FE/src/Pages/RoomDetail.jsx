@@ -56,6 +56,7 @@ const RoomDetail = () => {
       </div>
 
       {/* Nút đặt phòng */}
+      {/* Link tới path.js có url hotels/hotelId/roomId/booking */}
       <Link to={`/hotels/${room.hotelId}/rooms/${room.roomId}/booking`} className="text-right block">
         <Button type="primary">Đặt phòng</Button>
       </Link>

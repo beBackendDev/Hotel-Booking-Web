@@ -53,7 +53,9 @@ export const deleteRoomById = createAsyncThunk(
 
 export const updateRoomById = createAsyncThunk(
   "hotel/room/update",
-  payloadCreator(roomApi.updateRoomById)
+    async ({ hotelId, roomId, data }) => {
+    return await roomApi.updateRoomById(hotelId, roomId, data);
+  }
 );
 
 // Slice

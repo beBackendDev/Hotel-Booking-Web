@@ -34,7 +34,7 @@ import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AdminCtrl {
 
     @Autowired

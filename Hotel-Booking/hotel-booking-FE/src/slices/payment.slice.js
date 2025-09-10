@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import paymentApi from "../api/payment.api";
 
 export const processPayment = createAsyncThunk(
-  "payment/processPayment",
+  "payment/process-payment",
   async (paymentData, { rejectWithValue }) => {
     try {
       const res = await paymentApi.pay(paymentData);

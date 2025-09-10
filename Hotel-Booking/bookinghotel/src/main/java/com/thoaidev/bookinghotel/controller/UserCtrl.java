@@ -202,7 +202,7 @@ public ResponseEntity<?> queryVNPay(@RequestBody PaymentQueryRequest req,
     }
 
 
-    //Test VNPay
+    //Thanh toán VNPay
     @PostMapping("/public/create")
     public ResponseEntity<?> createPayment(@RequestBody PaymentInitRequest req, HttpServletRequest servletRequest) throws Exception {
         String url = vnPayService.createOrder(req, servletRequest);

@@ -7,6 +7,7 @@ import UnAuth from "./core/guards/UnAuth";
 import Dashboard from "./core/layout/Dashboard";
 import NotFound from "./core/layout/NotFound";
 import Booking from "./Pages/Booking";
+import Payment from "./Pages/Payment";
 import HomePage from "./Pages/HomePage";
 import Destinations from "./Pages/Destinations";
 import BookingManagement from "./Pages/Hotel/BookingManagement";
@@ -56,6 +57,12 @@ const Routes = () => {
       <Route exact path={path.bookingDetail}>
         <AuthenticatedGuard>
           <Booking />
+        </AuthenticatedGuard>
+      </Route>
+      {/* Payment Route */}
+      <Route exact path={path.payment}>
+        <AuthenticatedGuard>
+          <Payment />
         </AuthenticatedGuard>
       </Route>
       {/* Login/ Log out */}

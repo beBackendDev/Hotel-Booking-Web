@@ -9,7 +9,7 @@ class Path {
     this.hotelDetail = "/hotel/:id";
     this.roomDetail = "/hotels/:hotelid/rooms/:roomid"; // Ví dụ: /rooms/123
     this.bookingDetail = "/hotels/:hotelId/rooms/:roomId/booking";
-    this.payment = "/payment/:paymentId";
+    this.payment = "/payment/:bookingId";
 
     this.dashboard = "/dashboard";
     this.overview = this.dashboard + "/overview";

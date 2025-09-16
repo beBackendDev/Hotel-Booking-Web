@@ -19,6 +19,7 @@ import styles from "../styles/pages/login.module.scss";
 const Booking = () => {
   const { hotelId, roomId } = useParams();
   const { user } = useSelector((state) => state.auth.profile);
+  //thực hiện lấy thông tin thực của user đang thao tác với website
   const user_id = user.userId;
   const history = useHistory();
   const dispatch = useDispatch();
@@ -61,17 +62,20 @@ const Booking = () => {
     };
 
     try {
-      console.log("booking information:", _val);
-
+      console.log("(Booking.jsx)booking information:", _val);
+      // chuyển tiếp đến trang booking.slice.js
+      //để thực hiện gọi API phía backend
       const res = await dispatch(booking(_val));
       unwrapResult(res);
-      console.log("booking response:", res);
+      console.log("(Booking.jsx)booking response:", res);
 
       // const bookingId = res.data.bookingId;
       // if (res.data.redirectToPayment) {
       //   history("`/payment/${bookingId}`");
       // } 
       const bookingId = res.payload.data.bookingId;
+      console.log("(Booking.jsx bookingId: ", bookingId);
+      //chuyển tiếp đến trang thanh toán sau khi thực hiện đăng kí thông tin booking
       history.push(`/payment/${bookingId}`);
       toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
 

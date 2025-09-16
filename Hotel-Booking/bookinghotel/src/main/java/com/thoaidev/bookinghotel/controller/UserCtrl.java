@@ -22,9 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.thoaidev.bookinghotel.config.VNPayConfig;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
@@ -37,7 +34,7 @@ import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.mapper.HotelMapper;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
-import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentQueryRequest;
+import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResDTO;
 import com.thoaidev.bookinghotel.model.payment.service.VNPayService;
 import com.thoaidev.bookinghotel.model.review.ReviewDto;
 import com.thoaidev.bookinghotel.model.review.ReviewSer;
@@ -117,7 +114,7 @@ public class UserCtrl {
 // Tìm kiếm khách sạn theo từ khóa, địa điểm(filter)
 
     @PostMapping("/public/hotels/filter")
-   public ResponseEntity<HotelResponse> getAllHotels(@RequestBody FilterRequest request) {
+    public ResponseEntity<HotelResponse> getAllHotels(@RequestBody FilterRequest request) {
         HotelResponse hotels = hotelService.getAllHotels(request);
         return ResponseEntity.ok(hotels);
     }
@@ -145,8 +142,8 @@ public class UserCtrl {
 
         return ResponseEntity.ok(Map.of(
                 "bookingId", booking.getBookingId(),
-                "bookingStatus",booking.getStatus(),
-                "totalPrice",booking.getTotalPrice(),
+                "bookingStatus", booking.getStatus(),
+                "totalPrice", booking.getTotalPrice(),
                 "redirectToPayment", true
         ));
     }
@@ -169,52 +166,47 @@ public class UserCtrl {
 
     }
 
-// Thanh toán VNPay
-    @PostMapping("/public/create-payment")
-    public String submidOrder(  @RequestBody PaymentInitRequest req, 
-                                HttpServletRequest servletRequest) throws Exception {
-        // String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-        String vnpayUrl = vnPayService.createOrder(req, servletRequest);
-        return "redirect:" + vnpayUrl;
-    }
-//chưa dùng
-@PostMapping("/public/query-vnpay")
-public ResponseEntity<?> queryVNPay(@RequestBody PaymentQueryRequest req,
-                                     HttpServletRequest servletRequest) {
-    try {
-        String ip = VNPayConfig.getIpAddress(servletRequest);
-        JsonObject result = vnPayService.queryTransaction(req, ip);
-
-        // Convert JsonObject to Map for Jackson to serialize
-        Map<String, Object> map = new Gson().fromJson(result, Map.class);
-        return ResponseEntity.ok(map);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error querying transaction: " + e.getMessage());
-    }
-}
-
+// // Thanh toán VNPay X
+//     @PostMapping("/public/create-payment")
+//     public String submidOrder(  @RequestBody PaymentInitRequest req, 
+//                                 HttpServletRequest servletRequest) throws Exception {
+//         // String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+//         String vnpayUrl = vnPayService.createOrder(req, servletRequest);
+//         return "redirect:" + vnpayUrl;
+//     }
+// //chưa dùng
+// @PostMapping("/public/query-vnpay")
+// public ResponseEntity<?> queryVNPay(@RequestBody PaymentQueryRequest req,
+//                                      HttpServletRequest servletRequest) {
+//     try {
+//         String ip = VNPayConfig.getIpAddress(servletRequest);
+//         JsonObject result = vnPayService.queryTransaction(req, ip);
+//         // Convert JsonObject to Map for Jackson to serialize
+//         Map<String, Object> map = new Gson().fromJson(result, Map.class);
+//         return ResponseEntity.ok(map);
+//     } catch (Exception e) {
+//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                 .body("Error querying transaction: " + e.getMessage());
+//     }
+// }
     @GetMapping("/public/vnpay-payment")
     public String GetMapping(HttpServletRequest request) {
         int paymentStatus = vnPayService.orderReturn(request);
-
         return paymentStatus == 1 ? "ordersuccess" : "orderfail";
     }
-
-
     //Thanh toán VNPay
     @PostMapping("/public/create")
     public ResponseEntity<?> createPayment(@RequestBody PaymentInitRequest req, HttpServletRequest servletRequest) throws Exception {
         String url = vnPayService.createOrder(req, servletRequest);
-        return ResponseEntity.ok(Map.of(
-            "paymentUrl", url,
-            "bookingId", req.getBookingId(),
-            "amount", req.getAmount(),
-            "orderInfo", req.getOrderInfo()
-        ));
+        PaymentResDTO response = new PaymentResDTO(
+                req.getBookingId(),
+                req.getAmount(),
+                "Payment created successfully", // message mô tả hoặc req.getOrderInfo()
+                url // link VNPay trả về
+        );
+        return ResponseEntity.ok(response);
     }
 
-    
     //-
 // Đánh giá khách sạn
     @PostMapping("/hotels/reviews")

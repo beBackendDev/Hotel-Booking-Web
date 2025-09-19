@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Typography } from "antd";
-import { CheckOutlined, LoadingOutlined } from "@ant-design/icons";
+import { CheckOutlined, LoadingOutlined, CarOutlined, WifiOutlined, CoffeeOutlined } from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
 import { useParams } from "react-router-dom";
 import HomeLayout from "../core/layout/HomeLayout";
@@ -12,6 +12,14 @@ const HotelDetail = () => {
   const { id } = useParams(); // lấy id từ URL
   const [hotelInfo, setHotelInfo] = useState(null); // thông tin khách sạn
   const [rooms, setRooms] = useState([]); // danh sách phòng
+  // Map icon name (string) -> component
+  const iconMap = {
+    CarOutlined: <CarOutlined />,
+    WifiOutlined: <WifiOutlined />,
+    CoffeeOutlined: <CoffeeOutlined />,
+    CheckOutlined: <CheckOutlined />
+  };
+
 
   useEffect(() => {
     // Gọi API khách sạn
@@ -19,7 +27,7 @@ const HotelDetail = () => {
       try {
         const res = await fetch(`http://localhost:8080/api/user/public/hotels/${id}`);
         const data = await res.json();
-        console.log("(HotelDetail)API: " + data.hotelId + "--" + data.hotelName);
+        console.log("(HotelDetail)API:", data);
         setHotelInfo(data);
       } catch (err) {
         console.error("Lỗi khi lấy thông tin khách sạn:", err);
@@ -31,8 +39,8 @@ const HotelDetail = () => {
       try {
         const res = await fetch(`http://localhost:8080/api/user/public/hotels/${id}/rooms`);
         const data = await res.json();
-        console.log("(HotelDetail)API-Room: " + data);
-        setRooms(data || []); // hoặc data tùy response của bạn
+        console.log("(HotelDetail)API-Room:", data);
+        setRooms(data || []);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách phòng:", err);
       }
@@ -43,9 +51,6 @@ const HotelDetail = () => {
   }, [id]);
 
   const defaultImage = "../assets/images/image.png";
-  const facilities = hotelInfo?.hotelFacility
-    ? hotelInfo.hotelFacility.split(",").map(item => item.trim())
-    : [];
 
   return (
     <HomeLayout>
@@ -61,11 +66,16 @@ const HotelDetail = () => {
             <Typography.Text className="pb-4 italic">
               {hotelInfo.hotelRating || "no rating"}
             </Typography.Text>
-            {/* Mô tả */}
+
+            {/* Mô tả + Hình ảnh */}
             <div className="flex items-start gap-4">
               <div className="w-1/3">
                 <img
-                  src={`http://localhost:8080${hotelInfo?.hotelImageUrls[0]}` || defaultImage}
+                  src={
+                    hotelInfo?.hotelImageUrls?.length > 0
+                      ? `http://localhost:8080${hotelInfo.hotelImageUrls[0]}`
+                      : defaultImage
+                  }
                   alt={hotelInfo.hotelName}
                   className="w-full h-auto object-cover rounded-lg"
                 />
@@ -77,17 +87,27 @@ const HotelDetail = () => {
                 </p>
               </div>
             </div>
-            {/* Tiện ich */}
-            <Typography.Title level={2} className="mt-8 border-t-2">Danh sách các tiện ích</Typography.Title>
-            <div className="w-full flex flex-col gap-2 mt-4">
-              {facilities.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <CheckOutlined />
-                  <Typography.Text className="italic">{item}</Typography.Text>
-                </div>
-              ))}
-            </div>
 
+            {/* Tiện ích */}
+            <Typography.Title level={2} className="mt-8 border-t-2">
+              Danh sách các tiện ích
+            </Typography.Title>
+            <div className="w-full flex flex-col gap-2 mt-4">
+              {hotelInfo?.hotelFacilities?.length > 0 ? (
+                hotelInfo.hotelFacilities.map((facility) => (
+                  <div key={facility.id} className="flex items-center gap-2">
+                    {/* Icon (ở đây đang dùng CheckOutlined làm placeholder, 
+                        bạn có thể map facility.icon -> fontawesome hoặc ant icon khác) */}
+                    {iconMap[facility.icon]}
+                    <Typography.Text className="italic">
+                      {facility.name}
+                    </Typography.Text>
+                  </div>
+                ))
+              ) : (
+                <Typography.Text>Không có tiện ích nào</Typography.Text>
+              )}
+            </div>
           </>
         ) : (
           <div className="flex flex-row">
@@ -96,14 +116,15 @@ const HotelDetail = () => {
           </div>
         )}
 
-        <Typography.Title level={2} className="mt-8 border-t-2">Danh sách các phòng</Typography.Title>
+        {/* Danh sách phòng */}
+        <Typography.Title level={2} className="mt-8 border-t-2">
+          Danh sách các phòng
+        </Typography.Title>
         <div className="flex flex-row gap-6 mt-6">
-          {/* Cột trái: Danh sách phòng (chiếm 3/4) */}
+          {/* Cột trái: Danh sách phòng */}
           <div className="w-3/4">
             {rooms.length > 0 ? (
-              rooms.map((room) => (
-                <RoomCardItem key={room.id} room={room} />
-              ))
+              rooms.map((room) => <RoomCardItem key={room.id} room={room} />)
             ) : (
               <div className="flex flex-row items-center">
                 <LoadingOutlined />
@@ -112,18 +133,13 @@ const HotelDetail = () => {
             )}
           </div>
 
-          {/* Cột phải: Bộ lọc (chiếm 1/4) */}
-          {/* Nên check và tự động reload thông tin filter */}
+          {/* Cột phải: Bộ lọc */}
           <div className="w-1/4 border-t-2">
-            <Filter>
-            </Filter>
-
+            <Filter />
           </div>
         </div>
-
-
       </Content>
-      <Footer/>
+      <Footer />
     </HomeLayout>
   );
 };

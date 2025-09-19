@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +19,7 @@ public class HotelDto {
     private String hotelAddress;//dia chi khach san
 
     private BigDecimal hotelAveragePrice;//gia tien trung binh
-    private String hotelFacility;//tien ich
+    private List<HotelFacilityDTO> hotelFacilities;//tien ich
     private String hotelRating;//danh gia
     private String hotelContactMail;//Email lien he
     private String hotelContactPhone;//Phone lien he

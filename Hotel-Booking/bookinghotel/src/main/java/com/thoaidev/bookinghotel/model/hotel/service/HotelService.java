@@ -39,7 +39,4 @@ public interface HotelService {
 //DELETE methods
 
     public void deleteHotelById(Integer id);
-//Other methods
-
-    public HotelDto mapToHotelDto(Hotel hotel);
 }

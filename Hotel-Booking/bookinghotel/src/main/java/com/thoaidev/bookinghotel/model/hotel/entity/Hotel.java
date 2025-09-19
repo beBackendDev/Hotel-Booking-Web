@@ -9,6 +9,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
 import com.thoaidev.bookinghotel.model.review.Review;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
@@ -22,14 +23,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 // //Sử dụng @Getter @Setter thay vì @Data bởi vì @Data có thể gây lỗi khi sử dụng JPA
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "hotel")
 @Data
@@ -54,9 +53,6 @@ public class Hotel implements Serializable {
     @Column(name = "hotel_average_price")
     private BigDecimal hotelAveragePrice;//gia tien trung binh
 
-    @Column(name = "hotel_facility")
-    private String hotelFacility;//tien ich
-
     @Column(name = "hotel_rating")
     private String hotelRating;//danh gia
 
@@ -68,9 +64,7 @@ public class Hotel implements Serializable {
 
     @Column(name = "hotel_description")
     private String hotelDescription;//mo ta khách san
-
-    // @Column (name = "hotel_image")
-    // private String hotelImage;//hinh anh khách san
+    
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> hotelImages = new ArrayList<>();
 
@@ -87,4 +81,9 @@ public class Hotel implements Serializable {
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
+    // Quan hệ 1-N với HotelFacility
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HotelFacility> facilities = new ArrayList<>();
+
 }

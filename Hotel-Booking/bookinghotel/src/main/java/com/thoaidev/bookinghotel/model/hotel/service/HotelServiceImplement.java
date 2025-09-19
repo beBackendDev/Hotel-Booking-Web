@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
+import com.thoaidev.bookinghotel.model.common.HotelFacility;
+import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
 import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
@@ -30,8 +32,8 @@ import com.thoaidev.bookinghotel.model.image.service.ImageService;
 @Service
 public class HotelServiceImplement implements HotelService {
 
-    // @Autowired
-    // private ModelMapper modelMapper;
+    @Autowired
+    private HotelMapper hotelMapper;
     @Autowired
     private final HotelRepository hotelRepository;
 
@@ -47,7 +49,12 @@ public class HotelServiceImplement implements HotelService {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Hotel> hotels = hotelRepository.findAll(pageable);
         List<Hotel> listOfHotels = hotels.getContent();
-        List<HotelDto> content = listOfHotels.stream().map((hotel) -> mapToHotelDto(hotel)).collect(Collectors.toList());
+
+        List<HotelDto> content = listOfHotels.stream()
+                .map(hotelMapper::mapToHotelDto)
+                // .map((hotel) -> mapToHotelDto(hotel))
+                .collect(Collectors.toList());
+
         HotelResponse hotelResponse = new HotelResponse();
         hotelResponse.setContent(content);
         hotelResponse.setPageNo(hotels.getNumber());
@@ -61,16 +68,16 @@ public class HotelServiceImplement implements HotelService {
     //User: lấy thông tin khách sạn theo ID
     @Override
     public HotelDto getHotelById(Integer id) {
-        Hotel hotel = hotelRepository.findById(id).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
-        return mapToHotelDto(hotel);
+        Hotel hotel = hotelRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
+        return hotelMapper.mapToHotelDto(hotel);
     }
 
     @Override
     public HotelResponse getAllHotels(FilterRequest filter) {
         List<Hotel> hotels = hotelRepository.findAll(HotelSpecification.filter(filter));
-        HotelMapper mapper = new HotelMapper();
         List<HotelDto> content = hotels.stream()
-                .map(mapper::mapToHotelDto)
+                .map(hotelMapper::mapToHotelDto)
                 .collect(Collectors.toList());
 
         HotelResponse hotelResponse = new HotelResponse();
@@ -97,11 +104,27 @@ public class HotelServiceImplement implements HotelService {
         hotel.setHotelName(hotelDto.getHotelName());
         hotel.setHotelAddress(hotelDto.getHotelAddress());
         hotel.setHotelDescription(hotelDto.getHotelDescription());
-        hotel.setHotelFacility(hotelDto.getHotelFacility());
         hotel.setHotelRating(hotelDto.getHotelRating());
         hotel.setHotelContactMail(hotelDto.getHotelContactMail());
         hotel.setHotelContactPhone(hotelDto.getHotelContactPhone());
         hotel.setHotelAveragePrice(hotelDto.getHotelAveragePrice());
+
+        // Facilities (FacilityDto → Facility entity)
+        if (hotelDto.getHotelFacilities() != null) {
+            hotel.setFacilities(
+                    hotelDto.getHotelFacilities().stream()
+                            .map(f -> {
+                                HotelFacility facility = new HotelFacility();
+                                facility.setId(f.getId());
+                                facility.setIcon(f.getIcon());
+                                facility.setName(f.getName());
+                                facility.setHotel(hotel); // Quan trọng: gán hotel cho facility
+                                return facility;
+                            })
+                            .collect(Collectors.toList())
+            );
+        }
+
         List<Image> imageEntities = Optional.ofNullable(hotelDto.getHotelImageUrls())
                 .orElse(Collections.emptyList())
                 .stream()
@@ -118,7 +141,7 @@ public class HotelServiceImplement implements HotelService {
         hotel.setHotelUpdatedAt(now);
 
         Hotel savedHotel = hotelRepository.save(hotel);//goị tới Repository để update lên DB
-        return mapToHotelDto(savedHotel);
+        return hotelMapper.mapToHotelDto(savedHotel);
     }
 
 //Admin: Xóa khách sạn
@@ -144,10 +167,27 @@ public class HotelServiceImplement implements HotelService {
             hotel.setHotelDescription(hotelDto.getHotelDescription());
 
         }
-        if (hotelDto.getHotelFacility() != null) {
-            hotel.setHotelFacility(hotelDto.getHotelFacility());
+// Facilities
+        if (hotelDto.getHotelFacilities() != null) {
+            // Lấy danh sách facility hiện tại từ entity
+            List<HotelFacility> currentFacilities = hotel.getFacilities();
 
+            for (HotelFacilityDTO fDto : hotelDto.getHotelFacilities()) {
+                // Kiểm tra xem facility này đã tồn tại chưa
+                boolean exists = currentFacilities.stream()
+                        .anyMatch(f -> f.getName().equalsIgnoreCase(fDto.getName()));
+                // hoặc so sánh theo id nếu DTO luôn gửi id
+
+                if (!exists) {
+                    HotelFacility newFacility = new HotelFacility();
+                    newFacility.setIcon(fDto.getIcon());
+                    newFacility.setName(fDto.getName());
+                    newFacility.setHotel(hotel);
+                    currentFacilities.add(newFacility);
+                }
+            }
         }
+
         if (hotelDto.getHotelAveragePrice() != null) {
             hotel.setHotelAveragePrice(hotelDto.getHotelAveragePrice());
 
@@ -166,17 +206,21 @@ public class HotelServiceImplement implements HotelService {
         }
 
         if (hotelDto.getHotelImageUrls() != null) {
-            List<Image> imageEntities = hotelDto.getHotelImageUrls().stream()
-                    .map(url -> Image.builder()
-                    .url(url)
-                    .hotel(hotel) // liên kết ngược
-                    .build())
-                    .collect(Collectors.toList());
-            hotel.setHotelImages(imageEntities);
+            // Xoá toàn bộ ảnh cũ
+            hotel.getHotelImages().clear();
+
+            // Thêm ảnh mới từ DTO
+            for (String url : hotelDto.getHotelImageUrls()) {
+                Image image = Image.builder()
+                        .url(url)
+                        .hotel(hotel) // liên kết ngược
+                        .build();
+                hotel.getHotelImages().add(image);
+            }
         }
 
         Hotel updatedHotel = hotelRepository.save(hotel);
-        return mapToHotelDto(updatedHotel);
+        return hotelMapper.mapToHotelDto(updatedHotel);
     }
 
     //IMAGE UPLOAD
@@ -215,29 +259,6 @@ public class HotelServiceImplement implements HotelService {
         } catch (IOException e) {
             throw new RuntimeException("Lỗi đọc file upload: " + e.getMessage(), e);
         }
-    }
-
-    //_____________Other Methods_____________
-    @Override
-    public HotelDto mapToHotelDto(Hotel hotel) {
-        // Lấy danh sách URL từ danh sách ảnh
-        List<String> imageUrls = hotel.getHotelImages().stream()
-                .map(Image::getUrl)
-                .collect(Collectors.toList());
-        return HotelDto.builder()
-                .hotelId(hotel.getHotelId())
-                .hotelName(hotel.getHotelName())
-                .hotelImageUrls(imageUrls)
-                .hotelAveragePrice(hotel.getHotelAveragePrice())
-                .hotelFacility(hotel.getHotelFacility())
-                .hotelAddress(hotel.getHotelAddress())
-                .hotelContactMail(hotel.getHotelContactMail())
-                .hotelContactPhone(hotel.getHotelContactPhone())
-                .hotelDescription(hotel.getHotelDescription())
-                .hotelRating(hotel.getHotelRating())
-                .hotelCreatedAt(hotel.getHotelCreatedAt())
-                .hotelUpdatedAt(hotel.getHotelUpdatedAt())
-                .build();
     }
 
     @Override

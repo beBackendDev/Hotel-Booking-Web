@@ -1,12 +1,12 @@
 import { FacebookFilled, InstagramFilled, MailOutlined, TwitterSquareFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import Logo from "../../assets/Logo.png";
+import Logo from "../../assets/images/Logo.png";
 import styles from "./style.module.scss";
 
 const Footer = () => {
   return (
    <footer
-  className={`grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6 max-w-6xl mx-auto py-8 border-t ${styles.footerWrapper}`}
+  className={`${styles.footerWrapper} flex w-full px-8 py-6 justify-between items-center mx-auto py-8 border-t ${styles.footerWrapper}`}
 >
   {/* Cột trái: Logo + mô tả */}
   <div className="flex flex-col">
@@ -15,7 +15,7 @@ const Footer = () => {
       <div className="w-10 h-10 rounded-lg mr-3">
         <img src={Logo} alt="Logo" className="w-full h-full object-contain" />
       </div>
-      <span className="text-lg font-bold">Hotel Booking</span>
+      <span className="text-[25px] font-bold">QuiNhon | Travel</span>
     </div>
 
     {/* Hàng 2: Mô tả */}

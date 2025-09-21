@@ -4,7 +4,8 @@ import { Avatar, Button, Dropdown, Menu, Typography } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import Logo from "../../assets/Logo.png";
+import Logo from "../../assets/images/Logo.png";
+import placeholder from "../../assets/images/img-placeholder.jpg";
 import { path } from "../../constant/path";
 import { useAuthenticated } from "../../core/hooks/useAuthenticated";
 import { logout } from "../../slices/auth.slice";
@@ -45,13 +46,11 @@ const DropDownList = ({ roleId }) => {
 };
 const Navbar = () => {
   const profile = useSelector((state) => state.auth.profile);
-  // const roleId = profile?.user?.roleId;
   const roleName = profile?.user?.roleName;
   const authenticated = useAuthenticated();
 
   //scrolling
   const [isScrolled, setIsScrolled] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50); // chỉnh ngưỡng tùy bạn
@@ -61,21 +60,26 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   return (
-<nav
-  className={`z-10 flex w-full px-8 py-6 bg-gradient-to-b from-black/90 to-black/0 justify-between items-center text-sm text-white 
-  ${styles.navbarWrapper} ${isScrolled ? "opacity-80" && "bg-gradient-to-b from-black/100 to-black/0" : "opacity-100"}`}
->
-      
-      <Link to="/">
-        <div className="flex items-center">
+    <nav
+      className={`z-10 flex w-full px-8 py-6 justify-between items-center text-sm text-white 
+  ${styles.navbarWrapper} 
+  ${styles.navbar} 
+  ${isScrolled ? styles.scrolled : ""}
+  `}
+    >
+      <div className="flex items-center">
+        <Link to="/">
+
           <div className="w-8 h-8 rounded-lg">
             <img src={Logo} alt="" />
           </div>
-          <span className="ml-3 font-bold capitalize cursor-pointer">
-            Hotel Booking
-          </span>
-        </div>
-      </Link>
+
+        </Link>
+        <span className=" ml-3 text-[25px] font-bold capitalize cursor-pointer">
+          QuiNhon | Travel
+        </span>
+      </div>
+
       {/* Menu items */}
       <div className="flex items-center space-x-8">
         <Link to="/" className="font-medium">
@@ -108,18 +112,10 @@ const Navbar = () => {
 
             <div className="flex items-center">
               <Dropdown overlay={DropDownList({ roleName })} trigger={["click"]}>
-                <a href="/" className="flex items-center ml-4">
-                  <Avatar src={profile.user?.image} icon={<UserOutlined />} />
-                  <div className="flex flex-col px-4">
-                    <Typography.Text className="text-lg inline-block nav-title">
-                      {profile.user.username || profile.user.lastName}
-                    </Typography.Text>
-                    <Typography.Text className="text-sm inline-block">
-                      {/* {role[profile.user.roleId].name} */}
-                      {profile.user.role}
-                    </Typography.Text>
-                  </div>
-                  <DownOutlined />
+                <a href="/" className="flex items-center">
+                  <Avatar src={profile.user?.image || placeholder }
+                  />
+
                 </a>
               </Dropdown>
             </div>

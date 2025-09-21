@@ -1,5 +1,6 @@
 import { Card, Tag, Tooltip } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
+import placeholder from "../../assets/images/building-placeholder.png";
 import React from "react";
 import { Link } from "react-router-dom"; // THÊM nếu chưa import
 
@@ -9,7 +10,6 @@ const CardItem = ({ data }) => {
     .map((f) => f.trim()); // xoá khoảng trắng thừa
 
   // fallback image nếu không có ảnh từ APIx
-  const defaultImage = "../assets/images/image.png";
   console.log("(CardItem)" + data.hotelImageUrls);
   return (
   <div className="my-2">
@@ -19,7 +19,9 @@ const CardItem = ({ data }) => {
       cover={
         <div className="relative">
           <img
-            src={`http://localhost:8080${data?.hotelImageUrls?.[0]}` || defaultImage}
+            // src={`http://localhost:8080${data?.hotelImageUrls?.[0]}` || placeholder}
+            src={placeholder}
+
             alt={data?.hotelName || "Hotel Image"}
             className="h-48 w-full object-cover"
           />
@@ -31,17 +33,11 @@ const CardItem = ({ data }) => {
       }
     >
       <div className="flex flex-col">
-        <div className="flex flex-row justify-between items-center">
-          <div className="w-2/3 whitespace-nowrap overflow-hidden overflow-ellipsis">
-            <span className="font-medium text-lg text-gray-400">Khách sạn</span>
-          </div>
-          <Tag color="blue">Ngàn sao</Tag>
-        </div>
 
         <Tooltip placement="bottom" title={data?.hotelName}>
           <a
             href="/"
-            className="font-medium text-lg mt-2 line-clamp-1 overflow-ellipsis"
+            className="font-bold text-lg mt-2 line-clamp-1 overflow-ellipsis"
           >
             {data?.hotelName}
           </a>
@@ -55,14 +51,14 @@ const CardItem = ({ data }) => {
         </div>
       </div>
       <div className="mt-4 flex justify-between items-center">
-        <span className="text-red-500 font-semibold text-lg">
+        <span className="text-red-500 font-semibold text-[14px]">
           {data?.hotelAveragePrice
-            ? `${data.hotelAveragePrice.toLocaleString()} VNĐ`
+            ? `${data.hotelAveragePrice.toLocaleString()} VNĐ/ đêm`
             : "Liên hệ"}
         </span>
         <Link
           to={`/hotel/${data?.hotelId || "None"}`}
-          className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-50 transition"
+          className="px-3 py-1 border border-blue-500 text-[14px] text-blue-500 rounded-md hover:bg-blue-50 transition"
         >
           Xem chi tiết
         </Link>

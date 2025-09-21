@@ -1,4 +1,3 @@
-
 .navbarWrapper {
   :global {
     .ant-input-affix-wrapper-lg {
@@ -21,9 +20,11 @@
     }
   }
 
+
+
   a {
+    font-size: 18px;
     font-weight: bold;
-    font-size: 20px;
     text-decoration: none;
 
     &:hover {
@@ -31,4 +32,32 @@
     }
   }
 
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+
+  // trạng thái mặc định
+  background: transparent;
+  color: white !important;
+  // hiệu ứng transition
+  transition: background-color 0.4s ease, color 0.1s ease, box-shadow 0.4s ease;
+
+  &.scrolled {
+    background: #F5F5F5;//light gray
+    color: black !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+//backgound roster
+.hero{
+  background: linear-gradient(to bottom, rgba(255, 255, 255, .8) 1%, transparent 100%);
 }

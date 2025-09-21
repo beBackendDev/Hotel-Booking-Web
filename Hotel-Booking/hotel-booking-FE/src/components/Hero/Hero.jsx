@@ -51,11 +51,9 @@ const Hero = () => {
 
   return (
     <div className="max-w-screen">
-      <div className="py-12 px-4"
-        style={{
-          background: `linear-gradient(to top, rgba(0, 0, 0, .5) 55%, transparent 100%)`,
-        }}
-      >
+      <div className={`py-12 px-4 
+      ${styles.hero}
+      `}  >
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between">
           {/* Left Content */}
           <div className="max-w-xl">
@@ -96,7 +94,7 @@ const Hero = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <Form.Item
                 name="province_name"
-                label={<span style={{ color: "black" }}>Thành phố</span>}
+                label={<span style={{ color: "black" }}>Địa điểm</span>}
                 rules={[{ required: true }]}
               >
                 <Select placeholder="Địa điểm" style={{ width: "180px" }}>

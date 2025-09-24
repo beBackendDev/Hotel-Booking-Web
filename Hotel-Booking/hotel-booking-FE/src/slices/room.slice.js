@@ -38,7 +38,17 @@ export const createRoom = createAsyncThunk(
 
 export const getRoomByHotelId = createAsyncThunk(
   "hotel/room/getByHotelId",
-  payloadCreator(roomApi.getRoomByHotelId)
+  // payloadCreator(roomApi.getRoomByHotelId)
+  async ({ hotelId}) => {
+    return await roomApi.getRoomByHotelId(hotelId);
+  }
+);
+export const userGetRoomByHotelId = createAsyncThunk(
+  "hotel/room/getByHotelId",
+  // payloadCreator(roomApi.getRoomByHotelId)
+  async ({ hotelId}) => {
+    return await roomApi.userGetRoomByHotelId(hotelId);
+  }
 );
 
 export const searchRoomById = createAsyncThunk(
@@ -53,7 +63,7 @@ export const deleteRoomById = createAsyncThunk(
 
 export const updateRoomById = createAsyncThunk(
   "hotel/room/update",
-    async ({ hotelId, roomId, data }) => {
+  async ({ hotelId, roomId, data }) => {
     return await roomApi.updateRoomById(hotelId, roomId, data);
   }
 );
@@ -126,7 +136,7 @@ const roomSlice = createSlice({
       })
       .addCase(deleteRoomById.fulfilled, (state, action) => {
         state.loading = false;
-        state.rooms = state.rooms.filter((r) => r.id !== action.meta.arg); 
+        state.rooms = state.rooms.filter((r) => r.id !== action.meta.arg);
         state.success = true;
       })
       .addCase(deleteRoomById.rejected, (state, action) => {

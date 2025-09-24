@@ -33,11 +33,13 @@ public class HotelMapper {
                 .hotelImageUrls(imageUrls)
                 .hotelAveragePrice(hotel.getHotelAveragePrice())
                 .hotelFacilities(facilityDtos)
+                .hotelStatus(hotel.getHotalStatus())
                 .hotelAddress(hotel.getHotelAddress())
                 .hotelContactMail(hotel.getHotelContactMail())
                 .hotelContactPhone(hotel.getHotelContactPhone())
                 .hotelDescription(hotel.getHotelDescription())
-                .hotelRating(hotel.getHotelRating())
+                .ratingPoint(hotel.getRatingPoint())
+                .totalReview(hotel.getTotalReview())
                 .hotelCreatedAt(hotel.getHotelCreatedAt())
                 .hotelUpdatedAt(hotel.getHotelUpdatedAt())
                 .build();
@@ -53,7 +55,9 @@ public class HotelMapper {
         hotel.setHotelContactMail(dto.getHotelContactMail());
         hotel.setHotelContactPhone(dto.getHotelContactPhone());
         hotel.setHotelDescription(dto.getHotelDescription());
-        hotel.setHotelRating(dto.getHotelRating());
+        hotel.setRatingPoint(dto.getRatingPoint());
+        hotel.setTotalReview(dto.getTotalReview());
+        hotel.setHotalStatus(dto.getHotelStatus());
         hotel.setHotelCreatedAt(dto.getHotelCreatedAt());
         hotel.setHotelUpdatedAt(dto.getHotelUpdatedAt());
 

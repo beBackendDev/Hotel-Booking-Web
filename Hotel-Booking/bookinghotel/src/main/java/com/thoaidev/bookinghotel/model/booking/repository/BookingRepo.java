@@ -11,19 +11,32 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
+import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
-public interface BookingRepo extends JpaRepository<Booking, Integer>{
-     Page<Booking> findByUser(UserEntity user, Pageable pageable);
+public interface BookingRepo extends JpaRepository<Booking, Integer> {
 
-     
-     // Kiểm tra trùng lịch
-    @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId " +
-           "AND b.status IN ('PENDING_PAYMENT', 'PAID') " +
-           "AND (:startDate < b.checkoutDate AND :endDate > b.checkinDate)")
+    Page<Booking> findByUser(UserEntity user, Pageable pageable);
+
+    @Query("SELECT b FROM Booking b "
+            + "WHERE b.user.userId = :userId "
+            + "AND b.hotel.hotelId = :hotelId "
+            + "AND b.status = 'PAID' "
+            + "AND b.checkoutDate < :currentDate")
+    List<Booking> findEligibleBookingsForReview(
+            @Param("userId") Integer userId,
+            @Param("hotelId") Integer hotelId,
+            @Param("currentDate") LocalDate currentDate);
+
+
+
+    // Kiểm tra trùng lịch
+    @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId "
+            + "AND b.status IN ('PENDING_PAYMENT', 'PAID') "
+            + "AND (:startDate < b.checkoutDate AND :endDate > b.checkinDate)")
     List<Booking> findConflictingBookings(@Param("roomId") Integer roomId,
-                                          @Param("startDate") LocalDate startDate,
-                                          @Param("endDate") LocalDate endDate);
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     // Tìm các booking đã quá hạn chưa thanh toán
     @Query("SELECT b FROM Booking b WHERE b.status = 'PENDING_PAYMENT' AND b.createdAt < :expiredTime")

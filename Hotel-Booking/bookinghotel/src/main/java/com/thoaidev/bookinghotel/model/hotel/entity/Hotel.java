@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
 import com.thoaidev.bookinghotel.model.review.Review;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
@@ -17,6 +18,8 @@ import com.thoaidev.bookinghotel.model.room.entity.Room;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -53,8 +56,11 @@ public class Hotel implements Serializable {
     @Column(name = "hotel_average_price")
     private BigDecimal hotelAveragePrice;//gia tien trung binh
 
-    @Column(name = "hotel_rating")
-    private String hotelRating;//danh gia
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "hotel_status")
+    private HotelStatus hotalStatus;
 
     @Column(name = "hotel_contact_mail")
     private String hotelContactMail;//Email lien he
@@ -64,7 +70,7 @@ public class Hotel implements Serializable {
 
     @Column(name = "hotel_description")
     private String hotelDescription;//mo ta khách san
-    
+
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> hotelImages = new ArrayList<>();
 
@@ -79,8 +85,14 @@ public class Hotel implements Serializable {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
+    @Column(name = "rating_point")
+    private Double ratingPoint;//danh gia
+
+    @Column(name = "total_review")
+    private Integer totalReview;//danh gia
+
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();
+    private List<HotelReview> reviews = new ArrayList<>();
 
     // Quan hệ 1-N với HotelFacility
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)

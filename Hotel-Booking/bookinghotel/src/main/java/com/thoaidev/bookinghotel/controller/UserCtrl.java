@@ -31,6 +31,8 @@ import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
+import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
+import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 import com.thoaidev.bookinghotel.model.hotel.mapper.HotelMapper;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
@@ -194,6 +196,7 @@ public class UserCtrl {
         int paymentStatus = vnPayService.orderReturn(request);
         return paymentStatus == 1 ? "ordersuccess" : "orderfail";
     }
+
     //Thanh toán VNPay
     @PostMapping("/public/create")
     public ResponseEntity<?> createPayment(@RequestBody PaymentInitRequest req, HttpServletRequest servletRequest) throws Exception {
@@ -210,9 +213,22 @@ public class UserCtrl {
     //-
 // Đánh giá khách sạn
     @PostMapping("/hotels/reviews")
-    public ResponseEntity<?> createReview(@RequestBody ReviewDto reviewDTO) {
+    public ResponseEntity<?> createReview(@RequestBody HotelReviewDTO reviewDTO) {
         reviewSer.createReview(reviewDTO);
-        return ResponseEntity.ok("Review added successfully");
+        return ResponseEntity.ok(Map.of(
+                "hotel id: ", reviewDTO.getHotelId(),
+                "rating point: ", reviewDTO.getRatingPoint(),
+                "comment: ", reviewDTO.getComment()
+        ));
+    }
+// Xem danh sách đánh giá
+
+    @GetMapping("/hotels/{id}/reviews-list")
+    public ResponseEntity<List<HotelReviewDTO>> reviews(
+        @PathVariable Integer id
+    ){
+        List<HotelReviewDTO> reviewDTO = reviewSer.getReviewsByHotelId(id);
+        return ResponseEntity.ok(reviewDTO);
     }
 // Yêu thích khách sạn
 

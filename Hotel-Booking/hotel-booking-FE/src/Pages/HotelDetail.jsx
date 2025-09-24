@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Typography } from "antd";
-import { CheckOutlined, LoadingOutlined, CarOutlined, WifiOutlined, CoffeeOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  LoadingOutlined,
+  CarFilled,
+  WifiOutlined,
+  CoffeeOutlined,
+  ShopFilled,
+  SunFilled,
+  LikeFilled,
+  ClockCircleFilled,
+  DingdingOutlined,
+  ScheduleFilled
+} from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
+import ratinglayout from "../assets/images/ratinglayout.avif"
+import ratinglayout1 from "../assets/images/ratinglayout1.avif"
+import userplaceholder from "../assets/images/img-placeholder.jpg"
 import { useParams } from "react-router-dom";
 import HomeLayout from "../core/layout/HomeLayout";
 import RoomCardItem from "../components/RoomCardItem/RoomCardItem";
@@ -11,12 +26,20 @@ import Footer from "../components/Footer/Footer";
 const HotelDetail = () => {
   const { id } = useParams(); // lấy id từ URL
   const [hotelInfo, setHotelInfo] = useState(null); // thông tin khách sạn
+  const [hotelReviews, setHotelReviews] = useState(null); // thông tin danh gia
   const [rooms, setRooms] = useState([]); // danh sách phòng
+  const token = localStorage.getItem("accessToken");
+
   // Map icon name (string) -> component
   const iconMap = {
-    CarOutlined: <CarOutlined />,
+    CarFilled: <CarFilled />,
     WifiOutlined: <WifiOutlined />,
+    ShopFilled: <ShopFilled />,
+    SunFilled: <SunFilled />,
     CoffeeOutlined: <CoffeeOutlined />,
+    LikeFilled: <LikeFilled />,
+    ClockCircleFilled: <ClockCircleFilled />,
+    ScheduleFilled: <ScheduleFilled />,
     CheckOutlined: <CheckOutlined />
   };
 
@@ -45,12 +68,32 @@ const HotelDetail = () => {
         console.error("Lỗi khi lấy danh sách phòng:", err);
       }
     };
+    // Gọi API lấy danh sách reviews
+    const fetcchReviews = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/user/hotels/${id}/reviews-list`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        console.log("(HotelDetail)API-Reviews-List:", data);
+        setHotelReviews(data);
 
+
+      } catch (err) {
+        console.error("Lỗi khi lấy danh sách đánh giá:", err);
+
+      }
+    }
+    fetcchReviews();
     fetchHotel();
     fetchRooms();
   }, [id]);
 
   const defaultImage = "../assets/images/image.png";
+  const rating = hotelInfo?.ratingPoint >= 1.0 ? hotelInfo?.ratingPoint : "Chưa có đánh giá nào";
 
   return (
     <HomeLayout>
@@ -64,7 +107,7 @@ const HotelDetail = () => {
             </Typography.Text>
             {/* Đánh giá */}
             <Typography.Text className="pb-4 italic">
-              {hotelInfo.hotelRating || "no rating"}
+              {rating || "no rating"}
             </Typography.Text>
 
             {/* Mô tả + Hình ảnh */}
@@ -95,11 +138,13 @@ const HotelDetail = () => {
             <div className="w-full flex flex-col gap-2 mt-4">
               {hotelInfo?.hotelFacilities?.length > 0 ? (
                 hotelInfo.hotelFacilities.map((facility) => (
-                  <div key={facility.id} className="flex items-center gap-2">
+                  <div key={facility.id} className="flex items-center gap-2"
+                    style={{ color: "#0db3efff" }}
+                  >
                     {/* Icon (ở đây đang dùng CheckOutlined làm placeholder, 
                         bạn có thể map facility.icon -> fontawesome hoặc ant icon khác) */}
                     {iconMap[facility.icon]}
-                    <Typography.Text className="italic">
+                    <Typography.Text className="italic" style={{ color: "black" }}>
                       {facility.name}
                     </Typography.Text>
                   </div>
@@ -138,6 +183,58 @@ const HotelDetail = () => {
             <Filter />
           </div>
         </div>
+
+        {/* Đánh giá */}
+        <div className="mt-4 flex flex-col items-center justify-center p-10">
+          <span className="flex flex-row font-bold text-8xl justify-items-center">
+            <img src={ratinglayout1} className="w-[70px]" srcset="" />
+            {hotelInfo?.ratingPoint || 0.1}
+            <img src={ratinglayout} className="w-[70px]" srcset="" />
+          </span>
+          <span className="max-w-[300px] text-center">Được đánh giá chính xác dựa trên trải nghiệm người dùng</span>
+        </div>
+<div className="divide-y">
+  {hotelReviews && hotelReviews.length > 0 ? (
+    hotelReviews.map((review, index) => (
+      <div
+        key={index}
+        className="flex space-x-4 p-4 border-t border-b"
+      >
+        {/* Avatar */}
+        <img
+          src={review.userImgUrl || userplaceholder}
+          alt="avatar"
+          className="w-12 h-12 rounded-full object-cover"
+        />
+
+        {/* Nội dung */}
+        <div>
+          {/* Tên + mô tả */}
+          <h3 className="font-semibold">{review.userFullName}</h3>
+          <p className="text-sm text-gray-500">
+            Thành viên đã tham gia từ lâu
+          </p>
+
+          {/* Rating + thời gian */}
+          <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
+            <span className="text-black">
+              {"★".repeat(review.ratingPoint)}{"☆".repeat(5 - review.ratingPoint)}
+            </span>
+            <span>
+              {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+            </span>
+          </div>
+
+          {/* Review text */}
+          <p className="mt-2 text-gray-800">{review.comment}</p>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-500 p-4">Chưa có đánh giá nào</p>
+  )}
+</div>
+
       </Content>
       <Footer />
     </HomeLayout>

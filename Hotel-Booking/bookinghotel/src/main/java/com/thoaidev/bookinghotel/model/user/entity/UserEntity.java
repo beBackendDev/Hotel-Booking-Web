@@ -11,7 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
-import com.thoaidev.bookinghotel.model.review.Review;
+import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
 import com.thoaidev.bookinghotel.model.role.Role;
 
 import jakarta.persistence.CascadeType;
@@ -83,7 +83,7 @@ public class UserEntity {
     private List<Booking> bookings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews;
+    private List<HotelReview> reviews;
 
     @ManyToMany
     @JoinTable(

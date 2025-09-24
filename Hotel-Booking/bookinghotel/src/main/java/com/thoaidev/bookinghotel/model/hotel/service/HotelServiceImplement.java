@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
@@ -104,7 +106,9 @@ public class HotelServiceImplement implements HotelService {
         hotel.setHotelName(hotelDto.getHotelName());
         hotel.setHotelAddress(hotelDto.getHotelAddress());
         hotel.setHotelDescription(hotelDto.getHotelDescription());
-        hotel.setHotelRating(hotelDto.getHotelRating());
+        hotel.setRatingPoint(0.0);// mặc định khách sạn được tạo mới có điểm đánh giá 0.0 -> chưa đánh giá
+        hotel.setTotalReview(0);// mặc định khách sạn được tạo mới có điểm đánh giá 0.0 -> chưa đánh giá
+        hotel.setHotalStatus(HotelStatus.AVAILABLE);// AVAILABLE cho khách sạn tạo mới chưa được booked
         hotel.setHotelContactMail(hotelDto.getHotelContactMail());
         hotel.setHotelContactPhone(hotelDto.getHotelContactPhone());
         hotel.setHotelAveragePrice(hotelDto.getHotelAveragePrice());
@@ -192,8 +196,16 @@ public class HotelServiceImplement implements HotelService {
             hotel.setHotelAveragePrice(hotelDto.getHotelAveragePrice());
 
         }
-        if (hotelDto.getHotelRating() != null) {
-            hotel.setHotelRating(hotelDto.getHotelRating());
+        if (hotelDto.getRatingPoint() != null) {
+            hotel.setRatingPoint(hotelDto.getRatingPoint());
+
+        }
+        if (hotelDto.getTotalReview() != null) {
+            hotel.setTotalReview(hotelDto.getTotalReview());
+
+        }
+        if (hotelDto.getHotelStatus() != null) {
+            hotel.setHotalStatus(hotelDto.getHotelStatus());
 
         }
         if (hotelDto.getHotelContactPhone() != null) {
@@ -204,18 +216,29 @@ public class HotelServiceImplement implements HotelService {
             hotel.setHotelContactMail(hotelDto.getHotelContactMail());
 
         }
-
+//Images
         if (hotelDto.getHotelImageUrls() != null) {
-            // Xoá toàn bộ ảnh cũ
-            hotel.getHotelImages().clear();
+            // Lấy danh sách facility hiện tại từ entity
+            List<Image> currentHotelImages = hotel.getHotelImages();
+            List<String> newHotelImagesUrls = hotelDto.getHotelImageUrls();
+
+            //Lấy danh sách imgUls hiện tại từ DB
+            Set<String> currentUrls = currentHotelImages.stream()
+                    .map(Image::getUrl)
+                    .collect(Collectors.toSet());
+
+            // Xóa ảnh không còn trong DTO
+            currentHotelImages.removeIf(img -> !newHotelImagesUrls.contains(img.getUrl()));
 
             // Thêm ảnh mới từ DTO
-            for (String url : hotelDto.getHotelImageUrls()) {
-                Image image = Image.builder()
-                        .url(url)
-                        .hotel(hotel) // liên kết ngược
-                        .build();
-                hotel.getHotelImages().add(image);
+            for (String url : newHotelImagesUrls) {
+                if (!currentUrls.contains(url)) {
+                    Image newImage = Image.builder()
+                            .url(url)
+                            .hotel(hotel)
+                            .build();
+                    currentHotelImages.add(newImage);
+                }
             }
         }
 

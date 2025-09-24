@@ -31,6 +31,18 @@ export const roomApi = {
     ).then(res => res.data);
   },
 
+    // Lấy danh sách phòng theo hotelId
+  userGetRoomByHotelId: async (hotelId) => {
+    const token = localStorage.getItem("accessToken");
+    return axios.get(
+      `${BASE_URL}/user/public/hotels/${hotelId}/rooms`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    ).then(res => res.data);
+  },
   // Tìm kiếm phòng theo roomId
   searchRoomById: async (hotelId, roomId) => {
     const token = localStorage.getItem("accessToken");

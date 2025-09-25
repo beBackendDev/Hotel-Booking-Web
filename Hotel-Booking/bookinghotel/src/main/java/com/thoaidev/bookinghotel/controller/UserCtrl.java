@@ -31,14 +31,12 @@ import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
-import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 import com.thoaidev.bookinghotel.model.hotel.mapper.HotelMapper;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResDTO;
 import com.thoaidev.bookinghotel.model.payment.service.VNPayService;
-import com.thoaidev.bookinghotel.model.review.ReviewDto;
 import com.thoaidev.bookinghotel.model.review.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
@@ -217,7 +215,9 @@ public class UserCtrl {
         reviewSer.createReview(reviewDTO);
         return ResponseEntity.ok(Map.of(
                 "hotel id: ", reviewDTO.getHotelId(),
+                // "user id: ", reviewDTO.getUserId(),
                 "rating point: ", reviewDTO.getRatingPoint(),
+                "created: ", reviewDTO.getCreatedAt(),
                 "comment: ", reviewDTO.getComment()
         ));
     }

@@ -2,8 +2,6 @@ package com.thoaidev.bookinghotel.model.hotel.entity;
 
 import java.time.LocalDateTime;
 
-import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +17,6 @@ public class HotelReviewDTO {
     // private Integer userId;
     private Double ratingPoint; // 1 - 5 (số sao)
     private String comment;  // nội dung đánh giá
+    private LocalDateTime createdAt;
+
 }

@@ -25,10 +25,16 @@ import Footer from "../components/Footer/Footer";
 
 const HotelDetail = () => {
   const { id } = useParams(); // lấy id từ URL
+  const [userInfo, setUserInfo] = useState(null); // thông tin nguoi dung
+
   const [hotelInfo, setHotelInfo] = useState(null); // thông tin khách sạn
   const [hotelReviews, setHotelReviews] = useState(null); // thông tin danh gia
   const [rooms, setRooms] = useState([]); // danh sách phòng
   const token = localStorage.getItem("accessToken");
+  const userStr = localStorage.getItem("user");
+  const user = JSON.parse(userStr);
+  const userId = user.userId;
+  
 
   // Map icon name (string) -> component
   const iconMap = {
@@ -45,6 +51,25 @@ const HotelDetail = () => {
 
 
   useEffect(() => {
+    // Goi API lay thong tin nguoi dung 
+    const fetchUser = async () =>{
+      try {
+        const res = await fetch("http://localhost:8080/api/user/profile",
+          {
+            headers:{
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          }
+        );
+        const data = await res.json();
+        console.log("(HotelDetail)API-UserInf:", data);
+        setUserInfo(data);
+      } catch (err) {
+        console.error("Lỗi khi lấy thông tin khách sạn:", err);
+        
+      }
+    }
     // Gọi API khách sạn
     const fetchHotel = async () => {
       try {
@@ -90,6 +115,7 @@ const HotelDetail = () => {
     fetcchReviews();
     fetchHotel();
     fetchRooms();
+    fetchUser();
   }, [id]);
 
   const defaultImage = "../assets/images/image.png";
@@ -202,7 +228,7 @@ const HotelDetail = () => {
       >
         {/* Avatar */}
         <img
-          src={review.userImgUrl || userplaceholder}
+          src={userInfo.urlImg || userplaceholder}
           alt="avatar"
           className="w-12 h-12 rounded-full object-cover"
         />
@@ -210,7 +236,7 @@ const HotelDetail = () => {
         {/* Nội dung */}
         <div>
           {/* Tên + mô tả */}
-          <h3 className="font-semibold">{review.userFullName}</h3>
+          <h3 className="font-semibold">{userInfo.fullname}</h3>
           <p className="text-sm text-gray-500">
             Thành viên đã tham gia từ lâu
           </p>
@@ -218,7 +244,7 @@ const HotelDetail = () => {
           {/* Rating + thời gian */}
           <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
             <span className="text-black">
-              {"★".repeat(review.ratingPoint)}{"☆".repeat(5 - review.ratingPoint)}
+              {"★".repeat(review.ratingPoint)}{"☆".repeat(5.0 - review.ratingPoint)}
             </span>
             <span>
               {new Date(review.createdAt).toLocaleDateString("vi-VN")}

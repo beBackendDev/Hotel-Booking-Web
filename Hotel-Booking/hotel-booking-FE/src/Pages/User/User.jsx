@@ -32,7 +32,7 @@ const User = ({ children }) => {
                 <Link to={path.user}>Trang cá nhân</Link>
               </Menu.Item>
               <Menu.Item key={path.purchase} icon={<HistoryOutlined />}>
-                <Link to={path.purchase}>Phòng đã đặt</Link>
+                <Link to={path.purchase}>Lịch sử đặt phòng</Link>
               </Menu.Item>
               <Menu.Item key={path.changePass} icon={<KeyOutlined />}>
                 <Link to={path.changePass}>Đổi mật khẩu</Link>

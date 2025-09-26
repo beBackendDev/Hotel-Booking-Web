@@ -94,7 +94,7 @@ const HotelDetail = () => {
       }
     };
     // Gọi API lấy danh sách reviews
-    const fetcchReviews = async () => {
+    const fetchReviews = async () => {
       try {
         const res = await fetch(`http://localhost:8080/api/user/hotels/${id}/reviews-list`, {
           headers: {
@@ -112,7 +112,7 @@ const HotelDetail = () => {
 
       }
     }
-    fetcchReviews();
+    fetchReviews();
     fetchHotel();
     fetchRooms();
     fetchUser();

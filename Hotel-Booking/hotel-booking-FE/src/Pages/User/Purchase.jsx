@@ -1,59 +1,56 @@
-import { unwrapResult } from "@reduxjs/toolkit";
-import { Col, Row, Typography, Pagination } from "antd"; // thêm Pagination
+import { Col, Row, Typography, Pagination } from "antd";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getPurchase } from "../../slices/booking.slice";
+import { useSelector } from "react-redux";
 import User from "./User";
 import PurchaseCard from "../../components/PurchaseCard/PurchaseCard";
 
 const Purchase = () => {
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth.profile);
   const [purchaseList, setPurchaseList] = useState([]);
-  const token = localStorage.getItem("accessToken");
 
-  // phân trang
   const [pagination, setPagination] = useState({
     pageNo: 1,
-    pageSize: 5, // mỗi trang tối đa 5 đơn
+    pageSize: 5,
     totalPage: 1,
+    totalElements: 0,
   });
 
-  useEffect(() => {
-    const _getPurchase = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:8080/api/user/hotels/booking-management`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await res.json();
-        console.log("_getPurrchase: ", data);
+  const token = localStorage.getItem("accessToken");
 
-        setPurchaseList(data.content || []);
-        setPagination((prev) => ({
-          ...prev,
-          totalPage: Math.ceil((data.content?.length || 0) / prev.pageSize),
-        }));
-      } catch (error) {
-        console.error("Lỗi lấy đơn đặt:", error);
-      }
-    };
-    _getPurchase();
+  const fetchPurchase = async (pageNo, pageSize) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/user/hotels/booking-management?pageNo=${pageNo - 1}&pageSize=${pageSize}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      console.log("_getPurchase: ", data);
+
+      setPurchaseList(data?.content || []);
+      setPagination((prev) => ({
+        ...prev,
+        pageNo,
+        pageSize,
+        totalPage: data.totalPage,
+        totalElements: data.totalElements,
+      }));
+    } catch (error) {
+      console.error("Lỗi lấy đơn đặt:", error);
+    }
+  };
+
+  // fetch lần đầu khi component mount
+  useEffect(() => {
+    fetchPurchase(pagination.pageNo, pagination.pageSize);
   }, []);
 
-  // tính toán danh sách hiển thị theo trang hiện tại
-  const startIndex = (pagination.pageNo - 1) * pagination.pageSize;
-  const endIndex = startIndex + pagination.pageSize;
-  const currentPageData = purchaseList.slice(startIndex, endIndex);
-
-  // handler đổi trang
-  const handlePageChange = (page) => {
-    setPagination((prev) => ({ ...prev, pageNo: page }));
+  const handlePageChange = (page, pageSize) => {
+    fetchPurchase(page, pageSize);
   };
 
   return (
@@ -62,6 +59,7 @@ const Purchase = () => {
         <Typography.Title level={3} className="pt-5">
           Đơn đã đặt
         </Typography.Title>
+
         <Row gutter={[24, 24]} className="bg-orange-200 p-4">
           <Col sm={8}>
             <Typography.Text className="font-bold">Khách sạn</Typography.Text>
@@ -83,18 +81,20 @@ const Purchase = () => {
           </Col>
         </Row>
 
-        {currentPageData?.map((purchase) => (
-          <PurchaseCard purchase={purchase} key={purchase.id} />
+        {purchaseList?.map((purchase) => (
+          <PurchaseCard
+            purchase={purchase}
+            key={purchase.id}
+          />
         ))}
 
-        {/* Pagination */}
         <div className="flex justify-center mt-6">
           <Pagination
             current={pagination.pageNo}
             pageSize={pagination.pageSize}
-            total={purchaseList.length}
+            total={pagination.totalElements}
             onChange={handlePageChange}
-            showSizeChanger={false} // không cho đổi pageSize
+            showSizeChanger={false}
           />
         </div>
       </div>

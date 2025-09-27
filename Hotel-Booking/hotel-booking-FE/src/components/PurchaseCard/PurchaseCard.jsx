@@ -53,7 +53,7 @@ const PurchaseCard = ({ purchase }) => {
     };
     getHotel();
     getRoom();
-  }, []);
+  }, [hotelId, roomId, token]);
   return (
     <>
       <Row gutter={[24, 24]} className="px-5 py-10 rounded bg-gray-100 mt-4">
@@ -66,12 +66,12 @@ const PurchaseCard = ({ purchase }) => {
         </Col>
         <Col sm={3}>
           <Typography.Text>
-            {formatDate(purchase.checkoutDate)}
+            {formatDate(purchase.checkinDate)}
           </Typography.Text>
         </Col>        
         <Col sm={3}>
           <Typography.Text>
-            {formatDate(purchase.checkinDate)}
+            {formatDate(purchase.checkoutDate)}
           </Typography.Text>
         </Col>
         <Col sm={4}>

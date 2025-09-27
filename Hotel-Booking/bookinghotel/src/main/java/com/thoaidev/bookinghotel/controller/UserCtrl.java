@@ -225,8 +225,8 @@ public class UserCtrl {
 
     @GetMapping("/hotels/{id}/reviews-list")
     public ResponseEntity<List<HotelReviewDTO>> reviews(
-        @PathVariable Integer id
-    ){
+            @PathVariable Integer id
+    ) {
         List<HotelReviewDTO> reviewDTO = reviewSer.getReviewsByHotelId(id);
         return ResponseEntity.ok(reviewDTO);
     }
@@ -257,10 +257,16 @@ public class UserCtrl {
         return ResponseEntity.ok(dtoList);
     }
 
-// Xem thông tin cá nhân
+// Xem thông tin cá nhân thoong qua JWT Token
     @GetMapping("/profile")
     public ResponseEntity<UserDto> userDetail(@AuthenticationPrincipal CustomUserDetail user) {
         UserDto userDto = userService.getUserById(user.getId());
+        return ResponseEntity.ok(userDto);
+    }
+
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<UserDto> userDetailById(@PathVariable Integer userId) {
+        UserDto userDto = userService.getUserById(userId);
         return ResponseEntity.ok(userDto);
     }
 // Chỉnh sửa thông tin cá nhân

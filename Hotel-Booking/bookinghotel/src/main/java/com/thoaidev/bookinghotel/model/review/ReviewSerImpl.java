@@ -68,7 +68,7 @@ public List<HotelReviewDTO> getReviewsByHotelId(Integer hotelId) {
     return reviews.stream().map(review -> new HotelReviewDTO(
             review.getId(),
             hotelId,
-            // review.getUser().getUserId(),   // Lấy tên user
+            review.getUser().getUserId(),   // Lấy tên user
             review.getRatingPoint(),
             review.getComment(),
             review.getCreatedAt()

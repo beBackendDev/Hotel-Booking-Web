@@ -12,7 +12,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
-import com.thoaidev.bookinghotel.model.review.Review;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
 
 import jakarta.persistence.CascadeType;
@@ -68,7 +67,7 @@ public class Hotel implements Serializable {
     @Column(name = "hotel_contact_phone")
     private String hotelContactPhone;//Phone lien he
 
-    @Column(name = "hotel_description")
+    @Column(name = "hotel_description", columnDefinition = "TEXT")
     private String hotelDescription;//mo ta khách san
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)

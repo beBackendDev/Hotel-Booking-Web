@@ -25,16 +25,16 @@ import Footer from "../components/Footer/Footer";
 
 const HotelDetail = () => {
   const { id } = useParams(); // lấy id từ URL
-  const [userInfo, setUserInfo] = useState(null); // thông tin nguoi dung
+  const [userInfo, setUserInfo] = useState([]); // thông tin nguoi dung
 
-  const [hotelInfo, setHotelInfo] = useState(null); // thông tin khách sạn
-  const [hotelReviews, setHotelReviews] = useState(null); // thông tin danh gia
+  const [hotelInfo, setHotelInfo] = useState([]); // thông tin khách sạn
+  const [hotelReviews, setHotelReviews] = useState([]); // thông tin danh gia
   const [rooms, setRooms] = useState([]); // danh sách phòng
   const token = localStorage.getItem("accessToken");
   const userStr = localStorage.getItem("user");
   const user = JSON.parse(userStr);
   const userId = user.userId;
-  
+
 
   // Map icon name (string) -> component
   const iconMap = {
@@ -49,25 +49,49 @@ const HotelDetail = () => {
     CheckOutlined: <CheckOutlined />
   };
 
-
   useEffect(() => {
-    // Goi API lay thong tin nguoi dung 
-    const fetchUser = async () =>{
+    // Gọi API lấy danh sách reviews
+    const fetchReviews = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/user/profile",
-          {
-            headers:{
+        const res = await fetch(`http://localhost:8080/api/user/hotels/${id}/reviews-list`, {
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
           },
-          }
-        );
+        });
         const data = await res.json();
-        console.log("(HotelDetail)API-UserInf:", data);
-        setUserInfo(data);
+        console.log("(HotelDetail)API-Reviews-List:", data);
+        setHotelReviews(data);
+
+
       } catch (err) {
-        console.error("Lỗi khi lấy thông tin khách sạn:", err);
-        
+        console.error("Lỗi khi lấy danh sách đánh giá:", err);
+
+      }
+    }
+    fetchReviews();
+
+  }, []);
+  useEffect(() => {
+    // Goi API lay thong tin nguoi dung 
+    const fetchUser = async () => {
+      if (hotelReviews.length > 0) {
+        try {
+          const userPromises = hotelReviews.map((review) =>
+            fetch(`http://localhost:8080/api/user/profile/${review.userId}`, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }).then((res) => res.json())
+          );
+
+          const users = await Promise.all(userPromises);
+          console.log("(HotelDetail)API-AllUsers:", users);
+          setUserInfo(users); // Lưu danh sách user
+        } catch (error) {
+          console.error("Lỗi khi lấy danh sách user:", error);
+        }
       }
     }
     // Gọi API khách sạn
@@ -93,30 +117,10 @@ const HotelDetail = () => {
         console.error("Lỗi khi lấy danh sách phòng:", err);
       }
     };
-    // Gọi API lấy danh sách reviews
-    const fetchReviews = async () => {
-      try {
-        const res = await fetch(`http://localhost:8080/api/user/hotels/${id}/reviews-list`, {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
-        const data = await res.json();
-        console.log("(HotelDetail)API-Reviews-List:", data);
-        setHotelReviews(data);
-
-
-      } catch (err) {
-        console.error("Lỗi khi lấy danh sách đánh giá:", err);
-
-      }
-    }
-    fetchReviews();
+    fetchUser();
     fetchHotel();
     fetchRooms();
-    fetchUser();
-  }, [id]);
+  }, [id, hotelReviews]);
 
   const defaultImage = "../assets/images/image.png";
   const rating = hotelInfo?.ratingPoint >= 1.0 ? hotelInfo?.ratingPoint : "Chưa có đánh giá nào";
@@ -219,47 +223,37 @@ const HotelDetail = () => {
           </span>
           <span className="max-w-[300px] text-center">Được đánh giá chính xác dựa trên trải nghiệm người dùng</span>
         </div>
-<div className="divide-y">
-  {hotelReviews && hotelReviews.length > 0 ? (
-    hotelReviews.map((review, index) => (
-      <div
-        key={index}
-        className="flex space-x-4 p-4 border-t border-b"
-      >
-        {/* Avatar */}
-        <img
-          src={userInfo.urlImg || userplaceholder}
-          alt="avatar"
-          className="w-12 h-12 rounded-full object-cover"
-        />
+        <div className="divide-y">
+          {hotelReviews.map((review, index) => (
+            <div key={index} className="flex space-x-4 p-4 border-t border-b">
+              {/* Avatar */}
+              <img
+                src={userInfo?.[index]?.urlImg || userplaceholder}
+                alt="avatar"
+                className="w-12 h-12 rounded-full object-cover"
+              />
 
-        {/* Nội dung */}
-        <div>
-          {/* Tên + mô tả */}
-          <h3 className="font-semibold">{userInfo.fullname}</h3>
-          <p className="text-sm text-gray-500">
-            Thành viên đã tham gia từ lâu
-          </p>
+              {/* Nội dung */}
+              <div>
+                {/* Tên + mô tả */}
+                <h3 className="font-semibold">{userInfo?.[index]?.fullname}</h3>
+                <p className="text-sm text-gray-500">Thành viên đã tham gia từ lâu</p>
 
-          {/* Rating + thời gian */}
-          <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
-            <span className="text-black">
-              {"★".repeat(review.ratingPoint)}{"☆".repeat(5.0 - review.ratingPoint)}
-            </span>
-            <span>
-              {new Date(review.createdAt).toLocaleDateString("vi-VN")}
-            </span>
-          </div>
+                {/* Rating + thời gian */}
+                <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
+                  <span className="text-black">
+                    {"★".repeat(review.ratingPoint)}{"☆".repeat(5 - review.ratingPoint)}
+                  </span>
+                  <span>{new Date(review.createdAt).toLocaleDateString("vi-VN")}</span>
+                </div>
 
-          {/* Review text */}
-          <p className="mt-2 text-gray-800">{review.comment}</p>
+                {/* Review text */}
+                <p className="mt-2 text-gray-800">{review.comment}</p>
+              </div>
+            </div>
+          ))}
+
         </div>
-      </div>
-    ))
-  ) : (
-    <p className="text-gray-500 p-4">Chưa có đánh giá nào</p>
-  )}
-</div>
 
       </Content>
       <Footer />

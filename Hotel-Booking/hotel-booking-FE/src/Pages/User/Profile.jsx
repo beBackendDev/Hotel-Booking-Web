@@ -1,141 +1,116 @@
-import { UserOutlined } from "@ant-design/icons";
 import { unwrapResult } from "@reduxjs/toolkit";
 import {
-  Avatar,
-  Button,
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Radio,
-  Row,
-  Typography,
-} from "antd";
+  UserOutlined,//user inf
+  IdcardOutlined,//llocation
+  PhoneOutlined,//phone 
+  SolutionOutlined,//gender
+
+} from "@ant-design/icons";
+import { Avatar, Col, Row, Typography, Descriptions, Divider } from "antd";
+
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import UploadImage from "../../common/UploadImage";
+import avtHolder from "../../assets/images/img-placeholder.jpg"
 import { rules } from "../../constant/rules";
 import { updateMe } from "../../slices/auth.slice";
 import { formatDate } from "../../utils/helper";
 import User from "./User";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
-  const { user } = useSelector((state) => state.auth.profile);
-  console.log(">>user profile:", user);
-  const [banner, setBanner] = useState("");
-  const [progress, setProgress] = useState(0);
+  const [user, setUserProfile] = useState([]);
+  const { userAuth } = useSelector((state) => state.auth.profile);
+  console.log(">>user profile:", userAuth);
+  const token = localStorage.getItem("accessToken");
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/user/profile`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          }
+        });
+        const data = await res.json();
+        console.log("(Profile)API-UserProfile:", data);
+        setUserProfile(data);
 
-  // Khởi tạo giá trị form
-  const initialFormValues = {
-    username: user?.username || "",
-    fullname: user?.fullname || "",
-    phone: user?.phone || "",
-    birthday: user?.birthday ? moment(user.birthday, "YYYY-MM-DD") : null,
-    gender: user?.gender ?? true, // mặc định true nếu không có
-    image: banner.url || user.urlImg,
-  };
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách đánh giá:", error);
 
-  const onFinish = async (values) => {
-    try {
-      const _data = {
-        userId: user.userId,
-        username: user.username,
-        fullname: values.fullname,
-        phone: values.phone,
-        gender: values.gender,
-        birthday: values.birthday.format("YYYY-MM-DD"),
-        imgUrl: banner.url || user.urlImg,
-      };
-      const res = await dispatch(updateMe(_data)).unwrap();
-      console.log("Cập nhật thành công:", res.data);
-    } catch (error) {
-      console.log("Lỗi cập nhật:", error);
+      }
     }
-  };
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
+    fetchUser();
+  }, []);
+
+  const gender = user?.gender === true ? "Nam" : "Nữ";
   return (
     <User>
       <div className="px-8 bg-white h-screen rounded">
         <Typography.Text className="inline-block font-bold text-3xl mt-6 mb-16">
-          Chỉnh sửa trang cá nhân
+          Thông tin người dùng
         </Typography.Text>
-        <Form
-          name="profile"
-          initialValues={initialFormValues}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-          layout="vertical"
-          key={user.userId} // Để reset form khi user thay đổi
-        >
-          <Row gutter={[16, 16]}>
-            <Col span={18}>
-              <Form.Item label="Tên tài khoản" name="username" rules={rules.userName}>
-                <Input />
-              </Form.Item>
 
-              <Form.Item
-                label="Họ và tên"
-                name="fullname"
-                rules={[{ required: true, message: "Trường này không được bỏ trống" }]}
-              >
-                <Input />
-              </Form.Item>
+        <Row gutter={[16, 16]}>
+          {/* Avatar */}
+          <Col span={8} className="flex flex-col items-center">
+            <Avatar
+              src={userAuth?.avatar || avtHolder}
+              size={160}
+              icon={<UserOutlined />}
+            />
+          </Col>
 
-              <Form.Item
-                label="Số điện thoại"
-                name="phone"
-                rules={[{ required: true, message: "Trường này không được bỏ trống" }]}
-              >
-                <Input />
-              </Form.Item>
+          {/* Thông tin */}
+          <Col span={16}>
+            <Divider orientation="left">
+              <span className="flex items-center font-bold p-2">
+                <UserOutlined className="mr-4"
+                />
+                <span className="text-[18px]">Tên người dùng</span>
+              </span>
+            </Divider>
 
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label="Ngày sinh"
-                    name="birthday"
-                    rules={[{ required: true, message: "Trường này không được bỏ trống" }]}
-                  >
-                    <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="Giới tính" name="gender">
-                    <Radio.Group>
-                      <Radio value={true}>Nam</Radio>
-                      <Radio value={false}>Nữ</Radio>
-                    </Radio.Group>
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Col>
+            <span className="ml-[30px]">{user?.fullname || "None"}</span>
 
-            {/* Nếu dùng avatar và upload ảnh thì bỏ comment */}
-            <Col span={6}>
-              <Avatar
-                src={banner.url || user.urlImg}
-                size={160}
-                icon={<UserOutlined />}
-              />
-              <UploadImage onChange={setBanner} setProgress={setProgress} progress={progress} />
-            </Col>
-          </Row>
+            <Divider orientation="left">
+              <span className="flex items-center font-bold p-2">
+                <IdcardOutlined className="mr-4"
+                />
+                <span className="text-[18px]">Giới tính</span>
+              </span>
+            </Divider>
 
-          <div className="flex justify-center my-10">
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Cập nhập thông tin
-              </Button>
-            </Form.Item>
-          </div>
-        </Form>
+            <span className="ml-[30px]">{gender || "None"}</span>
+
+            <Divider orientation="left">
+              <span className="flex items-center font-bold p-2">
+                <PhoneOutlined className="mr-4"
+                />
+                <span className="text-[18px]">Số điện thoại</span>
+              </span>
+            </Divider>
+
+            <span className="ml-[30px]">{user?.phone || "None"}</span>
+
+            <Link
+              to={`/users/${user?.userId}/reviews`}
+              className="block  rounded-md transition-colors"
+            >
+              <Divider orientation="left">
+                <span className="hover:bg-gray-100 flex items-center font-bold p-2">
+                  <SolutionOutlined className="mr-4 text-[20px]" />
+                  <span className="text-[18px]">Click để xem sách đánh giá</span>
+                </span>
+              </Divider>
+            </Link>
+
+          </Col>
+
+        </Row>
       </div>
     </User>
   );

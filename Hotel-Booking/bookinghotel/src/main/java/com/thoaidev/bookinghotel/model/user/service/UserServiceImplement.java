@@ -21,6 +21,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.thoaidev.bookinghotel.dto.OtpData;
+import com.thoaidev.bookinghotel.exceptions.NotFoundException;
+import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
+import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
+import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
+import com.thoaidev.bookinghotel.model.review.mapper.ReviewMapper;
 import com.thoaidev.bookinghotel.model.role.Role;
 import com.thoaidev.bookinghotel.model.role.RoleRepository;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
@@ -30,11 +35,12 @@ import com.thoaidev.bookinghotel.model.user.dto.request.UserUpdateRequest;
 import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
-import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImplement implements UserService {
 
     @Autowired
@@ -45,13 +51,12 @@ public class UserServiceImplement implements UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JavaMailSender mailSender;
-
+    @Autowired
+    private BookingMapper bookingMapper;
+    @Autowired
+    private ReviewMapper reviewMapper;
     private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
 
-    public UserServiceImplement(UserRepository userRepository, RoleRepository roleRepository) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-    }
 
     /*
     ------------THAO TÁC VỚI NGƯỜI DÙNG ------------
@@ -91,12 +96,26 @@ public class UserServiceImplement implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, Integer userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Đối tượng User không tồn tại"));
-        user.setFullname(userDto.getFullname());
-        user.setPassword(userDto.getPassword());
-        user.setUserPhone(userDto.getPhone());
-        user.setImgUrl(userDto.getUrlImg());
-        user.setGender(userDto.getGender());
-        user.setBirthday(userDto.getBirthday());
+        if (userDto.getFullname() != null) {
+            user.setFullname(userDto.getFullname());
+
+        }
+        if (userDto.getPhone() != null) {
+            user.setUserPhone(userDto.getPhone());
+
+        }
+        if (userDto.getUrlImg() != null) {
+            user.setImgUrl(userDto.getUrlImg());
+
+        }
+        if (userDto.getGender() != null) {
+            user.setGender(userDto.getGender());
+
+        }
+        if (userDto.getBirthday() != null) {
+            user.setBirthday(userDto.getBirthday());
+
+        }
 
         UserEntity updatedUser = userRepository.save(user);
         return mapToUserDto(updatedUser);
@@ -251,6 +270,15 @@ public class UserServiceImplement implements UserService {
                 .findFirst()
                 .map(Role::getRoleName)
                 .orElse(null);
+
+        List<BookingDTO> bookingList = user.getBookings().stream()
+                .map(bookingMapper::toDTO)
+                .collect(Collectors.toList());
+
+        List<HotelReviewDTO> reviewList = user.getReviews().stream()
+                .map(reviewMapper::toDTO)
+                .collect(Collectors.toList());
+
         UserDto userDto = UserDto
                 .builder()
                 .userId(user.getUserId())
@@ -262,6 +290,8 @@ public class UserServiceImplement implements UserService {
                 .birthday(user.getBirthday())
                 .gender(user.getGender())
                 .urlImg(user.getImgUrl())
+                .bookings(bookingList)
+                .reviews(reviewList)
                 .build();
 
         return userDto;

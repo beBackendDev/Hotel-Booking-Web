@@ -6,7 +6,7 @@ import {
   SolutionOutlined,//gender
 
 } from "@ant-design/icons";
-import { Avatar, Col, Row, Typography, Descriptions, Divider } from "antd";
+import { Avatar, Col, Row, Typography, Descriptions, Divider, Button } from "antd";
 
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ import { updateMe } from "../../slices/auth.slice";
 import { formatDate } from "../../utils/helper";
 import User from "./User";
 import { Link } from "react-router-dom";
+import { path } from "../../constant/path";
 
 const Profile = () => {
   const [user, setUserProfile] = useState([]);
@@ -47,12 +48,39 @@ const Profile = () => {
   }, []);
 
   const gender = user?.gender === true ? "Nam" : "Nữ";
+  const date = user?.birthday;
+  let birthday = "NULL"
+  if (date) {
+    const [year, month, day] = date.split('-');
+    const safedate = new Date(year, month - 1, day);
+    birthday = new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(safedate);
+    console.log(birthday);
+
+  }
+
+
   return (
     <User>
       <div className="px-8 bg-white h-screen rounded">
-        <Typography.Text className="inline-block font-bold text-3xl mt-6 mb-16">
-          Thông tin người dùng
-        </Typography.Text>
+        <div className="flex flex-row justify-between items-center mb-16 pt-6">
+          <span className="inline-block font-bold text-3xl">
+            Thông tin người dùng
+          </span>
+          <Link
+            to={path.updateUser}>
+            <Button>
+              Chỉnh sửa
+            </Button>
+          </Link>
+
+
+        </div>
+
+
 
         <Row gutter={[16, 16]}>
           {/* Avatar */}
@@ -66,6 +94,7 @@ const Profile = () => {
 
           {/* Thông tin */}
           <Col span={16}>
+
             <Divider orientation="left">
               <span className="flex items-center font-bold p-2">
                 <UserOutlined className="mr-4"
@@ -73,8 +102,16 @@ const Profile = () => {
                 <span className="text-[18px]">Tên người dùng</span>
               </span>
             </Divider>
+            <span className="ml-[100px]">{user?.fullname || "None"}</span>
 
-            <span className="ml-[30px]">{user?.fullname || "None"}</span>
+            <Divider orientation="left">
+              <span className="flex items-center font-bold p-2">
+                <IdcardOutlined className="mr-4"
+                />
+                <span className="text-[18px]">Ngày sinh</span>
+              </span>
+            </Divider>
+            <span className="ml-[100px]">{birthday || "None"}</span>
 
             <Divider orientation="left">
               <span className="flex items-center font-bold p-2">
@@ -83,8 +120,9 @@ const Profile = () => {
                 <span className="text-[18px]">Giới tính</span>
               </span>
             </Divider>
+            <span className="ml-[100px]">{gender || "None"}</span>
 
-            <span className="ml-[30px]">{gender || "None"}</span>
+
 
             <Divider orientation="left">
               <span className="flex items-center font-bold p-2">
@@ -93,8 +131,8 @@ const Profile = () => {
                 <span className="text-[18px]">Số điện thoại</span>
               </span>
             </Divider>
+            <span className="ml-[100px]">{user?.phone || "None"}</span>
 
-            <span className="ml-[30px]">{user?.phone || "None"}</span>
 
             <Link
               to={`/users/${user?.userId}/reviews`}

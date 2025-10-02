@@ -1,9 +1,7 @@
-package com.thoaidev.bookinghotel.model.review;
+package com.thoaidev.bookinghotel.model.review.dto;
 
 import groovy.transform.builder.Builder;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 
 

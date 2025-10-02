@@ -31,6 +31,7 @@ class Path {
     this.bookingManagement = this.dashboard + "/booking-management";
 
     this.user = "/user";
+    this.updateUser= "/user/update"
     this.changePass = this.user + "/password";
     this.purchase = this.user + "/purchase";
 

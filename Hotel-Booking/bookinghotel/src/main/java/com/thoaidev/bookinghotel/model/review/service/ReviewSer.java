@@ -1,4 +1,4 @@
-package com.thoaidev.bookinghotel.model.review;
+package com.thoaidev.bookinghotel.model.review.service;
 
 import java.util.List;
 

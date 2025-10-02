@@ -37,7 +37,7 @@ import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResDTO;
 import com.thoaidev.bookinghotel.model.payment.service.VNPayService;
-import com.thoaidev.bookinghotel.model.review.ReviewSer;
+import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;

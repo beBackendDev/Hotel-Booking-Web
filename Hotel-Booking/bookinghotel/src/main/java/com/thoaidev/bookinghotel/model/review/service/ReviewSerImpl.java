@@ -1,4 +1,4 @@
-package com.thoaidev.bookinghotel.model.review;
+package com.thoaidev.bookinghotel.model.review.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +15,7 @@ import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
+import com.thoaidev.bookinghotel.model.review.repo.ReviewRepository;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ReviewSerImpl implements ReviewSer {
         Integer hotelId = hotelReviewDTO.getHotelId();
         LocalDate now = LocalDate.now();
 
-        // Kiểm tra booking hợp lệ
+        // Kiểm tra tính khả thi của người dùng khi viết Review
         List<Booking> bookings = bookingRepo.findEligibleBookingsForReview(userId, hotelId, now);
         if (bookings.isEmpty()) {
             throw new RuntimeException("Bạn chưa có quyền đánh giá khách sạn này");

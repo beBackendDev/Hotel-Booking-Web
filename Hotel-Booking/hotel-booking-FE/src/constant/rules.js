@@ -1,3 +1,4 @@
+import { message } from "antd";
 import { isEmail } from "../utils/helper";
 
 export const rules = {
@@ -45,5 +46,19 @@ export const rules = {
       max: 10,
       message: "Password từ 6 đến 10 kí tự",
     },
+  ],
+  phonenumber: [
+    {
+      required: true,
+      message: "Vui lòng nhập số điện thoại người dùng",
+    },
+    {
+      max: 10,
+      message: "Số điện thoại có tối đa 10 kí tự",
+    },
+    {
+      pattern: /^[0-9]+$/,
+      message:"Số điện thoại không tồn tại kí tự chữ viết"
+    }
   ],
 };

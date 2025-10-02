@@ -11,24 +11,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
-import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
 
     Page<Booking> findByUser(UserEntity user, Pageable pageable);
 
+    //kiểm tra tính khả thi khi viết Review của người dùng
     @Query("SELECT b FROM Booking b "
             + "WHERE b.user.userId = :userId "
             + "AND b.hotel.hotelId = :hotelId "
-            + "AND b.status = 'PAID' "
+            + "AND (b.status = 'PAID' or  b.status = 'COMPLETED')"
             + "AND b.checkoutDate < :currentDate")
     List<Booking> findEligibleBookingsForReview(
             @Param("userId") Integer userId,
             @Param("hotelId") Integer hotelId,
             @Param("currentDate") LocalDate currentDate);
-
-
 
     // Kiểm tra trùng lịch
     @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId "
@@ -39,6 +37,10 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             @Param("endDate") LocalDate endDate);
 
     // Tìm các booking đã quá hạn chưa thanh toán
-    @Query("SELECT b FROM Booking b WHERE b.status = 'PENDING_PAYMENT' AND b.createdAt < :expiredTime")
+    @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.status  = 'PENDING_PAYMENT' AND b.createdAt< :expiredTime")
     List<Booking> findExpiredBookings(@Param("expiredTime") LocalDateTime expiredTime);
+
+    //Tìm booking tới hạn checkout
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkoutDate) <= :today")
+    List<Booking> findBookingsToRelease(@Param("today") LocalDate today);
 }

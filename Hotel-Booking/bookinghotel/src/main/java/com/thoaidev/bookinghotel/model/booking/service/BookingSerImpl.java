@@ -46,8 +46,8 @@ public class BookingSerImpl implements BookingSer {
     private RoomRepository roomRepository;
 
     @Autowired
-    private UserRepository userRepository;    
-    
+    private UserRepository userRepository;
+
     @Autowired
     private BookingMapper bookingMapper;
 
@@ -60,10 +60,10 @@ public class BookingSerImpl implements BookingSer {
 
     //  Cron job: huỷ booking quá hạn
     @Override
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000)//cứ 60s thì thực hiện check 1 lần
     @Transactional
     public void cancelExpiredBookings() {
-        LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);// thực hiện để thời gian tồn tại booking là 5 phút
         List<Booking> expired = bookingRepository.findExpiredBookings(expiryTime);
         for (Booking booking : expired) {
             booking.setStatus(BookingStatus.CANCELLED);
@@ -79,13 +79,35 @@ public class BookingSerImpl implements BookingSer {
         }
     }
 
+    @Scheduled(fixedRate = 60000)//60s/time
+    @Transactional
+    public void releaseCheckedOutRooms() {
+        //Thực hiện lấy thông tin ngày giờ hiện tại
+        LocalDate today = LocalDate.now();
+
+        //Kiểm tra checkout_date 
+        List<Booking> checkedOut = bookingRepository.findBookingsToRelease(today);
+
+        //Thực hiện set lại mặc định các thông tin sau khi hết hạn booking
+        for (Booking booking : checkedOut) {
+            booking.setStatus(BookingStatus.COMPLETED); // đã hoàn tất lưu trú
+            Room room = booking.getRoom();
+            room.setRoomStatus(RoomStatus.AVAILABLE);
+        }
+        System.out.println("Found(BookingService): " + checkedOut.size());
+        if (!checkedOut.isEmpty()) {
+            bookingRepository.saveAll(checkedOut);
+            System.out.println("Released " + checkedOut.size() + " rooms after checkout.");
+        }
+    }
+
     // Book Room
     @Override
     public Booking bookRoom(BookingDTO bookingDTO, UserEntity user) {
         if (!isRoomAvailable(bookingDTO.getRoomId(), bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Room isn't available that day");
         } else {
-
+            //Khởi tạo một Booking mới
             Booking booking = new Booking();
 
             // Lấy thông tin khách sạn
@@ -103,7 +125,7 @@ public class BookingSerImpl implements BookingSer {
 
             // Tính tổng tiền
             BigDecimal totalPrice = room.getRoomPricePerNight()
-                            .multiply(BigDecimal.valueOf(nights));
+                    .multiply(BigDecimal.valueOf(nights));
             //Tạo booking
             booking.setHotel(hotel);
             booking.setUser(user);

@@ -3,8 +3,8 @@ package com.thoaidev.bookinghotel.model.user.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.thoaidev.bookinghotel.model.booking.entity.Booking;
-import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
+import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
+import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 
 import lombok.Builder;
 import lombok.Data;
@@ -31,8 +31,8 @@ public class UserDto {
 
     private LocalDate birthday;
 
-    private List<Booking> bookings;// Lay danh sach Booking
+    private List<BookingDTO> bookings;// Lay danh sach Booking
 
-    private List<HotelReview> reviews;// Lay danh sach Review
+    private List<HotelReviewDTO> reviews;// Lay danh sach Review
 
 }

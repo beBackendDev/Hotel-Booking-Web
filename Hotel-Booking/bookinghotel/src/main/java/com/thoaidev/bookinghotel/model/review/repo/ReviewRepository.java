@@ -1,4 +1,4 @@
-package com.thoaidev.bookinghotel.model.review;
+package com.thoaidev.bookinghotel.model.review.repo;
 
 import java.util.List;
 
